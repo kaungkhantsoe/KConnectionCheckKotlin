@@ -6,7 +6,6 @@ import android.view.View
 import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.LifecycleOwner
-import com.yammobots.kconnectioncheck.R
 import java.lang.Exception
 
 object KConnectionCheck {
@@ -48,16 +47,27 @@ object KConnectionCheck {
             if (connectionStatus != isConnected) {
                 connectionStatus = isConnected ?: false
                 connectionStatusChangeListener.onConnectionStatusChange(isConnected ?: false)
-                if (customConnectionBuilder != null && customConnectionBuilder.isShowSnackOnStatusChange) if (customConnectionBuilder.bottomNavigationView != null) ConnectionSnack.show(
-                    context,
-                    customConnectionBuilder.bottomNavigationView!!,
-                    isConnected ?: false,
-                    customConnectionBuilder
-                ) else ConnectionSnack.show(
-                    context, (context as Activity).findViewById(
-                        R.id.content
-                    ), isConnected ?: false, customConnectionBuilder
-                )
+                if (customConnectionBuilder != null && customConnectionBuilder.isShowSnackOnStatusChange)
+                    if (customConnectionBuilder.bottomNavigationView != null)
+                        try {
+                            ConnectionSnack.show(
+                                context,
+                                customConnectionBuilder.bottomNavigationView!!,
+                                isConnected ?: false,
+                                customConnectionBuilder
+                            )
+                        } catch (e: Exception) {
+                            e.printStackTrace()
+                        }
+                    else try {
+                        ConnectionSnack.show(
+                            context, (context as Activity).findViewById(
+                                android.R.id.content
+                            ), isConnected ?: false, customConnectionBuilder
+                        )
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                    }
             }
         }
     }
@@ -97,7 +107,7 @@ object KConnectionCheck {
             this.noConnectionDrawable = noConnectionDrawable ?: 0
             this.connectionRestoredDrawable = connectionRestoredDrawable ?: 0
             isHideWhenConnectionRestored = hideWhenConnectionRestored ?: true
-            this.noConnectionTextColor = noConnectionTextColor  ?: 0
+            this.noConnectionTextColor = noConnectionTextColor ?: 0
             this.connectionRestoredTextColor = connectionRestoredTextColor ?: 0
             this.dismissTextColor = dismissTextColor ?: 0
             this.dismissText = dismissText
