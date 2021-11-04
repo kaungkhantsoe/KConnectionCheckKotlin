@@ -5,7 +5,7 @@ plugins {
 }
 
 group = "com.github.kaungkhantsoe"
-version = '1.0.2'
+version = '1.0.3'
 
 android {
     compileSdk 31
@@ -13,8 +13,8 @@ android {
     defaultConfig {
         minSdk 21
         targetSdk 31
-        versionCode 1
-        versionName "1.0.2"
+        versionCode 4
+        versionName "1.0.3"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -55,7 +55,7 @@ afterEvaluate {
                 from components.release
                 groupId = 'com.github.kaungkhantsoe'
                 artifactId = 'kconnectioncheck'
-                version = '1.0.2'
+                version = '1.0.3'
             }
         }
     }
