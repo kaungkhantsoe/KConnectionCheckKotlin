@@ -1,0 +1,6 @@
+<resources>
+    <string name="app_name">KConnectionCheck</string>
+
+    <string name="text_label_1">Page 1</string>
+    <string name="text_label_2">Page 2</string>
+</resources>

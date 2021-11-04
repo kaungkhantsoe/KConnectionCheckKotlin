@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="dismiss">Dismiss</string>
+    <string name="connection_restored">Connection restored.</string>
+    <string name="no_connection">No connection.</string>
+</resources>
