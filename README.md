@@ -19,7 +19,7 @@ allprojects {
 Add this to your app-level build.gradle
 ```gradle
 dependencies {
-	       implementation 'com.github.kaungkhantsoe:KConnectionCheck:1.0.0'
+	           implementation 'com.github.kaungkhantsoe:KConnectionCheckKotlin:TAG'
 
 	}
 ```
@@ -32,26 +32,31 @@ Simple usage
 
 Customize build
 ```java
-KConnectionCheck.CustomConnectionBuilder builder = new KConnectionCheck.CustomConnectionBuilder();
-        builder.setNoConnectionText("Custom No Connection Text");
-        builder.setNoConnectionTextColor(getResources().getColor(android.R.color.holo_red_dark));
-        builder.setNoConnectionDrawable(R.drawable.ic_no_connection);
-        builder.setHideWhenConnectionRestored(false);
-        builder.setDismissText("Close");
+private lateinit var binding: ActivityMainBinding
 
-KConnectionCheck.addConnectionCheck(this,
-                this,
-                this,
-                builder
-        );
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
+
+        val builder = KConnectionCheck.CustomConnectionBuilder()
+        builder.bottomNavigationView = binding.bottomNavigation
+
+        KConnectionCheck.addConnectionCheck(
+            this,
+            this,
+            this,
+            builder
+        )
+    }
 ```
 
 Detect status change
 ```java
-@Override
-public void onConnectionStatusChange(boolean status) {
-// Do something
-}
+  override fun onConnectionStatusChange(status: Boolean) {
+        // TODO: Here you can change ui according to network changes
+    }
  ```
 
 
