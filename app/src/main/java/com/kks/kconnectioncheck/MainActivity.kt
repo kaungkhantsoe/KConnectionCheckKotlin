@@ -5,7 +5,7 @@ import android.os.Bundle
 import com.kks.kconnectioncheck.databinding.ActivityMainBinding
 
 
-class MainActivity: AppCompatActivity(), KConnectionCheck.ConnectionStatusChangeListener {
+class MainActivity : AppCompatActivity(), KConnectionCheck.ConnectionStatusChangeListener {
 
     private lateinit var binding: ActivityMainBinding
 

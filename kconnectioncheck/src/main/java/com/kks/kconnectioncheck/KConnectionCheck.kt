@@ -7,6 +7,7 @@ import androidx.annotation.ColorInt
 import androidx.annotation.DrawableRes
 import androidx.lifecycle.LifecycleOwner
 import com.yammobots.kconnectioncheck.R
+import java.lang.Exception
 
 object KConnectionCheck {
     private var connectionStatus = true
@@ -21,12 +22,16 @@ object KConnectionCheck {
             if (connectionStatus != isConnected) {
                 connectionStatus = isConnected ?: false
                 connectionStatusChangeListener.onConnectionStatusChange(isConnected ?: false)
-                ConnectionSnack.show(
-                    context,
-                    (context as Activity).findViewById(R.id.content),
-                    isConnected ?: false,
-                    null
-                )
+                try {
+                    ConnectionSnack.show(
+                        context,
+                        (context as Activity).findViewById(android.R.id.content),
+                        isConnected ?: false,
+                        null
+                    )
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
             }
         }
     }
