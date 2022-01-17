@@ -1,27 +1,25 @@
 package com.kks.kconnectioncheck
 
 import android.annotation.TargetApi
-import android.content.BroadcastReceiver
 import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.net.*
 import android.net.ConnectivityManager.NetworkCallback
 import android.os.Build
 import androidx.lifecycle.LiveData
 
-class ConnectionLiveData(private val context: Context) : LiveData<Boolean?>() {
-    private val connectivityManager: ConnectivityManager = context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
+class ConnectionLiveData(context: Context) : LiveData<Boolean?>() {
+    private val connectivityManager: ConnectivityManager =
+        context.getSystemService(Context.CONNECTIVITY_SERVICE) as ConnectivityManager
     private var connectivityManagerCallback: NetworkCallback? = null
     private var networkRequestBuilder: NetworkRequest.Builder? = null
     override fun onActive() {
         super.onActive()
         updateConnection()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            networkRequestBuilder = NetworkRequest.Builder()
-                .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
-                .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+        networkRequestBuilder = NetworkRequest.Builder()
+            .addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR)
+            .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
+        when {
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.N -> {
                 try {
                     connectivityMarshmallowManagerCallback?.let {
                         connectivityManager.registerDefaultNetworkCallback(it)
@@ -29,34 +27,25 @@ class ConnectionLiveData(private val context: Context) : LiveData<Boolean?>() {
                 } catch (e: IllegalAccessException) {
                     e.printStackTrace()
                 }
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            }
+            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M -> {
                 try {
                     marshmallowNetworkAvailableRequest()
                 } catch (e: IllegalAccessException) {
                     e.printStackTrace()
                 }
-            } else if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                try {
-                    lollipopNetworkAvailableRequest()
-                } catch (e: IllegalAccessException) {
-                    e.printStackTrace()
-                }
             }
-        } else {
-            context.registerReceiver(
-                networkReceiver,
-                IntentFilter("android.net.conn.CONNECTIVITY_CHANGE")
-            ) // android.net.ConnectivityManager.CONNECTIVITY_ACTION
+            else -> try {
+                lollipopNetworkAvailableRequest()
+            } catch (e: IllegalAccessException) {
+                e.printStackTrace()
+            }
         }
     }
 
     override fun onInactive() {
         super.onInactive()
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            connectivityManager.unregisterNetworkCallback(connectivityManagerCallback!!)
-        } else {
-            context.unregisterReceiver(networkReceiver)
-        }
+        connectivityManager.unregisterNetworkCallback(connectivityManagerCallback!!)
     }
 
     @TargetApi(Build.VERSION_CODES.LOLLIPOP)
@@ -80,17 +69,15 @@ class ConnectionLiveData(private val context: Context) : LiveData<Boolean?>() {
     }
 
     private val connectivityLollipopManagerCallback =
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            object : ConnectivityManager.NetworkCallback() {
-                override fun onAvailable(network: Network) {
-                    postValue(true)
-                }
-
-                override fun onLost(network: Network) {
-                    postValue(false)
-                }
+        object : ConnectivityManager.NetworkCallback() {
+            override fun onAvailable(network: Network) {
+                postValue(true)
             }
-        } else throw IllegalAccessException("Accessing wrong API version")
+
+            override fun onLost(network: Network) {
+                postValue(false)
+            }
+        }
 
     private val connectivityMarshmallowManagerCallback =
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -99,9 +86,12 @@ class ConnectionLiveData(private val context: Context) : LiveData<Boolean?>() {
                     network: Network,
                     networkCapabilities: NetworkCapabilities
                 ) {
-                    if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET)) postValue(
-                        true
-                    )
+                    if (networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+                            networkCapabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)) {
+                        val hasTransport = networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_WIFI) ||
+                                networkCapabilities.hasTransport(NetworkCapabilities.TRANSPORT_CELLULAR)
+                        postValue(hasTransport)
+                    }
                 }
 
                 override fun onLost(network: Network) {
@@ -111,15 +101,12 @@ class ConnectionLiveData(private val context: Context) : LiveData<Boolean?>() {
             connectivityManagerCallback
         } else throw IllegalAccessException("Accessing wrong API version")
 
-    private val networkReceiver: BroadcastReceiver = object : BroadcastReceiver() {
-        override fun onReceive(context: Context, intent: Intent) {
-            updateConnection()
-        }
-    }
-
     private fun updateConnection() {
         val activeNetwork = connectivityManager.activeNetworkInfo
-        if (activeNetwork != null) postValue(activeNetwork.isConnected) else postValue(false)
+        if (activeNetwork != null)
+            postValue(activeNetwork.isConnected)
+        else
+            postValue(false)
     }
 
 }
