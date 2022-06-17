@@ -120,8 +120,7 @@ class ConnectionLiveData(context: Context) : LiveData<Boolean?>() {
         val activeNetwork = connectivityManager.activeNetworkInfo
         if (activeNetwork != null) {
             postValue(activeNetwork.isConnected)
-        }
-        else {
+        } else {
             postValue(false)
         }
     }
